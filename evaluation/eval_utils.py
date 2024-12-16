@@ -3,6 +3,22 @@ import json
 import os 
 import numpy as np
 import openai
+from enum import Enum
+import torch
+from open_clip import create_model_from_pretrained, get_tokenizer
+from PIL import Image
+import random
+import transformers
+
+
+def set_seeds(seed):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed) 
+    transformers.set_seed(seed)
+
+
 
 def add_results_to_json(file_path, metrics):
     try:
@@ -108,7 +124,100 @@ def gpt_score(question, true_answer, generated_answer):
     response = model_inst.infer(input_msg)
     return response
 
+class SimilarityType(Enum):
+    IMAGE_CAPTION = "image_caption"
+    CAPTION_CAPTION = "caption_caption"
+    IMAGE_IMAGE = "image_image"
+
+
+class CLIPSimilarity:
+    def __init__(self, model_name, context_length=256, device=None):
+        self.model_name = model_name
+        self.context_length = context_length
+        self.device = (
+            device if device else torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+        )
+
+        self.model, self.preprocess = create_model_from_pretrained(model_name)
+        self.tokenizer = get_tokenizer(model_name)
+        self.model.to(self.device)
+        self.model.eval()
+
+        print(
+            f"Model loaded with {sum(p.numel() for p in self.model.parameters() if p.requires_grad)} parameters"
+        )
+
+    def _process_image(self, image_path):
+        """Process a single image and return its features"""
+        with Image.open(image_path) as img:
+            if img.mode == "RGBA":
+                img = img.convert("RGB")
+            image = self.preprocess(img).unsqueeze(0).to(self.device)
+
+        with torch.no_grad():
+            image_features = self.model.encode_image(image)
+            return image_features / image_features.norm(dim=-1, keepdim=True)
+
+    def _process_text(self, text):
+        """Process a single text and return its features"""
+        texts = self.tokenizer([text], context_length=self.context_length).to(self.device)
+        with torch.no_grad():
+            text_features = self.model.encode_text(texts)
+            return text_features / text_features.norm(dim=-1, keepdim=True)
+
+    def calculate_similarity(self, source1, source2, similarity_type: SimilarityType):
+        # cosine similarity, higher score means more similar
+        if similarity_type == SimilarityType.IMAGE_CAPTION:
+            img_features = self._process_image(source1)
+            txt_features = self._process_text(source2)
+            if img_features is None or txt_features is None:
+                return None
+            similarity = (img_features @ txt_features.t()).item()
+
+        elif similarity_type == SimilarityType.CAPTION_CAPTION:
+            txt1_features = self._process_text(source1)
+            txt2_features = self._process_text(source2)
+            if txt1_features is None or txt2_features is None:
+                return None
+            similarity = (txt1_features @ txt2_features.t()).item()
+
+        elif similarity_type == SimilarityType.IMAGE_IMAGE:
+            img1_features = self._process_image(source1)
+            img2_features = self._process_image(source2)
+            if img1_features is None or img2_features is None:
+                return None
+            similarity = (img1_features @ img2_features.t()).item()
+
+        return similarity
+
+def get_biomed_clip_model():
+    return CLIPSimilarity(model_name="hf-hub:microsoft/BiomedCLIP-PubMedBERT_256-vit_base_patch16_224")
+
+
+
+
 def chameleon_prompt_processor(question, image_path, task_type):
+    
+    if task_type == "visual_chat":
+        return False # Flag to turn off sft mode
+    
+    if task_type == "mm_out":
+        
+        question += " Answer the question with one picture."
+        content = [question]
+        modality = ["text"]
+        return content, modality
+    
+    if task_type == "image_captioning":
+        content = [image_path, "Please describe this picture.",]
+        modality = ["image", "text"]
+        return content, modality
+    
+    if task_type == "image_generation":
+        content = [question]
+        modality = ["text"]
+        return content, modality
+    
     if not question.endswith('\n'):
         question += '\n'
         
@@ -135,6 +244,21 @@ def medmax_no_vqa_ablation_prompt_processor(question, image_path, task_type):
     pass
 
 def sft_prompt_processor(question, image_path, task_type):
+    
+    if task_type == "visual_chat":
+        return True # Flag to turn on sft mode
+    
+    if task_type == "mm_out" or task_type == "image_generation":
+        
+        content = [question, "<END-OF-TURN>"]
+        modality = ["text", "sentinel"]
+        return content, modality
+    
+    if task_type == "image_captioning":
+        content = [image_path, "Please describe this picture.", "<END-OF-TURN>"]
+        modality = ["image", "text", "sentinel"]
+        return content, modality
+    
     content = [image_path, question, "<END-OF-TURN>"]
     modality = ["image", "text", "sentinel"]
     return content, modality

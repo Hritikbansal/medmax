@@ -82,7 +82,7 @@ def split_token_sequence(
 
 
 # https://github.com/GAIR-NLP/anole/blob/main/inference.py
-def chameleon_generate(model, content, modality="text", task="text-gen", sft=True, max_gen_len=None, temp=None, greedy=False, save_dir="eval/outputs/inference"): 
+def chameleon_generate(model, content, modality="text", task="text-gen", sft=True, max_gen_len=None, temp=None, greedy=True, save_dir="evaluation/outputs/inference"): 
     
     
     # Generate options
