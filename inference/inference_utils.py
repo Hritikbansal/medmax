@@ -144,11 +144,11 @@ def chameleon_generate(model, content, modality="text", task="text-gen", sft=Tru
             image_path = os.path.join(save_dir, f"{uuid.uuid4()}_{seg_id}.png")
             img.save(image_path)
             outputs.append(image_path)
-            print(f"<img: {image_path}>")
+            # print(f"<img: {image_path}>")
         else:
             assert seg_type == "text_seg"
             decoded_text = model.decode_text(seg_tokens)[0]
             outputs.append(decoded_text)
-            print(decoded_text)
+            # print(decoded_text)
             
     return outputs

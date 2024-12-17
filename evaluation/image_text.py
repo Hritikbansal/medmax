@@ -34,11 +34,8 @@ def run_image_captioning_eval(model, prompt_processor, save_dir, save_name, eval
             
             image_path = os.path.join(eval_data_dir, instance["image_path"])
             
-            # caption = instance["prompt"]
-            
             content, modality = prompt_processor(None, image_path, "image_captioning")
             
-                # text_outputs = anole_generate(model, content=image_path, modality="image", task="text-gen", sft=args.sft, max_gen_len=60)[0]
             text_outputs = chameleon_generate(model, content=content, modality=modality, task="text-gen", sft=False, max_gen_len=4096)[0]
             
             captioning_score = similarity_calculator.calculate_similarity(
@@ -102,20 +99,4 @@ def run_image_generation_eval(model, prompt_processor, save_dir, save_name, eval
     results_dict = {"image_generation": results_dict}
     save_path = f"{save_dir}/results/{save_name}.json"
     add_results_to_json(save_path, results_dict)
-
-# def parse_arguments() -> argparse.Namespace:
-#     """Parse command line arguments."""
-#     parser = argparse.ArgumentParser(description="Generate interleaved image-text content based on text instructions.")
-#     parser.add_argument("--ckpt", default='/localhome/data/ckpts/Anole-7b-v0.1', type=str, help="path to anole checkpoint.")
-#     parser.add_argument("--save_dir", default="eval/outputs", type=str, help="The directory to save the generated images.")
-#     parser.add_argument("--save_name", default=None, type=str, help="The name of the saved file.")
-#     parser.add_argument("--sft", default=False, type=bool, help="Use sft")
-#     parser.add_argument("--temp", default=1.0, type=float, help="Text decoding temp")
-#     args: argparse.Namespace = parser.parse_args()
-#     return args
-
-# if __name__ == "__main__":
-#     args: argparse.Namespace = parse_arguments()
-#     main(args)
-
 

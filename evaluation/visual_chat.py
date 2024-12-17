@@ -186,7 +186,7 @@ def run_visual_chat_eval(model, prompt_processor, save_dir, save_name, eval_data
     
     dataset = load_from_disk("/localhome/data/datasets/medmax_eval_data/eval_data")
     
-    dataset = dataset.filter(lambda example: example['task_name'] == "visual_chat").select(range(5))
+    dataset = dataset.filter(lambda example: example['task_name'] == "visual_chat")
     for idx, example in tqdm(enumerate(dataset)):
 
         image_path = os.path.join(eval_data_dir, example['image_path'])
@@ -203,7 +203,6 @@ def run_visual_chat_eval(model, prompt_processor, save_dir, save_name, eval_data
           modality.append("text")
 
         else:
-        #   if line['text'].endswith(DEFAULT_IMAGE_TOKEN):
           if example['prompt'].endswith(DEFAULT_IMAGE_TOKEN):
             # put image at the end
             content.append(qs)

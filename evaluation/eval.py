@@ -6,7 +6,7 @@ from tqdm import tqdm
 import os
 
 
-from evaluation.vqa import run_all_vqa_evals
+from evaluation.vqa import run_vqa_evals, run_vqa_eval
 from evaluation.mm_out import run_mm_out_eval
 from evaluation.visual_chat import run_visual_chat_eval
 from evaluation.image_text import run_image_captioning_eval, run_image_generation_eval
@@ -14,7 +14,6 @@ from evaluation.image_text import run_image_captioning_eval, run_image_generatio
 
 
 # def run_evals(tasks):
-
 
     
 def main(args):
@@ -28,7 +27,7 @@ def main(args):
         prompt_processor = default_prompt_processor
 
     set_seeds(42)
-    run_all_vqa_evals(model, prompt_processor, args.save_dir, args.save_name, args.eval_data_dir)
+    run_vqa_evals(model, prompt_processor, args.save_dir, args.save_name, args.eval_data_dir)
     
     set_seeds(42)
     run_mm_out_eval(model, prompt_processor, args.save_dir, args.save_name, args.eval_data_dir)

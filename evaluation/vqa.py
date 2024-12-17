@@ -15,7 +15,6 @@ def run_vqa_eval(task_name, task_type, model, prompt_processor, save_dir, save_n
     print(f"Running evaluation for {task_type} task: {task_name}...")
     
     for example in tqdm(dataset):
-        print(example)
         question = example['prompt']
         answer = example['answer']
         image_path = os.path.join(eval_data_dir, example['image_path'])
@@ -39,7 +38,7 @@ def run_vqa_eval(task_name, task_type, model, prompt_processor, save_dir, save_n
                                                 modality=modality, 
                                                 task="text-gen", 
                                                 sft=False, 
-                                                max_gen_len=10)[0]
+                                                max_gen_len=60)[0]
             generated_text = generated_text.lower()
             
             gpt_response = gpt_score(question, answer, generated_text)
@@ -67,7 +66,7 @@ def run_vqa_eval(task_name, task_type, model, prompt_processor, save_dir, save_n
         
         scores.append(is_correct)
         logs.append({"question": question, "image_path": image_path, "answer": answer, "generated_text": generated_text, "is_correct": is_correct})
-    
+        
     
     task_id = f"{task_name}_{task_type}"
     file_path = f"{save_dir}/logs/{save_name}.json"
@@ -81,10 +80,21 @@ def run_vqa_eval(task_name, task_type, model, prompt_processor, save_dir, save_n
     add_results_to_json(file_path, metrics)
         
         
-def run_all_vqa_evals(model, prompt_processor, save_dir, save_name, eval_data_dir):
+def run_vqa_evals(model, prompt_processor, save_dir, save_name, eval_data_dir, task_type='all'):
 
     VQA_TASKS = [("vqa_rad", "closed"), ("slake", "closed"), ("pathvqa", "closed"), ("quilt_vqa", "closed"),
                  ("vqa_rad", "open"), ("slake", "open"), ("pathvqa", "open"), ("quilt_vqa", "open"),
                  ("pmc_vqa", "mcq"), ("omnimed_vqa", "mcq"), ("path_mmu", "mcq"), ("probmed", "closed")]
+    
+    if task_type == 'open':
+        VQA_TASKS = [task for task in VQA_TASKS if task[1] == 'open']
+    elif task_type == 'closed':
+        VQA_TASKS = [task for task in VQA_TASKS if task[1] == 'closed']
+    elif task_type == 'mcq':
+        VQA_TASKS = [task for task in VQA_TASKS if task[1] == 'mcq']
+         
+        
     for task_name, task_type in VQA_TASKS:
         run_vqa_eval(task_name, task_type, model, prompt_processor, save_dir, save_name, eval_data_dir)
+        
+        
