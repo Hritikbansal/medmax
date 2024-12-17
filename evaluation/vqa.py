@@ -1,12 +1,12 @@
     
-from datasets import load_from_disk
+from datasets import load_dataset
 from inference.inference_utils import chameleon_generate
 from evaluation.eval_utils import add_results_to_json, log_samples, gpt_score, calculate_accuracy_and_stderr
 from tqdm import tqdm
 import os
 
 def run_vqa_eval(task_name, task_type, model, prompt_processor, save_dir, save_name, eval_data_dir):
-    dataset = load_from_disk("/localhome/data/datasets/medmax_eval_data/eval_data")
+    dataset = load_dataset("mint-medmax/medmax_eval_data")
     dataset = dataset.filter(lambda example: example['task_name'] == task_name and example['question_type'] == task_type)
     
     scores = []

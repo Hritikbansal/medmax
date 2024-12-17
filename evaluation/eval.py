@@ -1,21 +1,12 @@
-from datasets import load_from_disk
-from inference.inference_utils import chameleon_generate, load_chameleon
+from inference.inference_utils import load_chameleon
 from evaluation.eval_utils import chameleon_prompt_processor, sft_prompt_processor, default_prompt_processor, set_seeds
 import argparse
-from tqdm import tqdm
-import os
-
-
-from evaluation.vqa import run_vqa_evals, run_vqa_eval
+from evaluation.vqa import run_vqa_evals
 from evaluation.mm_out import run_mm_out_eval
 from evaluation.visual_chat import run_visual_chat_eval
 from evaluation.image_text import run_image_captioning_eval, run_image_generation_eval
 
 
-
-# def run_evals(tasks):
-
-    
 def main(args):
     model = load_chameleon(args.ckpt)
     

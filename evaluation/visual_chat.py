@@ -1,5 +1,4 @@
 import os
-import argparse
 from copy import deepcopy
 from tqdm import tqdm
 from pathlib import Path
@@ -12,9 +11,9 @@ import shortuuid
 import math
 import tiktoken
 import openai
-from datasets import load_from_disk
-from rouge_score import rouge_scorer
+from datasets import load_dataset
 import ast
+from evaluation.const import OAI_KEY
 
 
 INSTRUCT_PROMPT = """We would like to request your feedback on the performance of two AI assistants in response to the user question displayed above. The user asks the question on observing an image. For your reference, the visual content in the image is represented with caption describing the same image.
@@ -68,7 +67,7 @@ class GPT:
   # TODO: use a more secure way to store the API key
   openai_cxn_dict = {
     'default': {
-        'api_key': "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",
+        'api_key': OAI_KEY
     },
   }
 
@@ -184,7 +183,7 @@ def run_visual_chat_eval(model, prompt_processor, save_dir, save_name, eval_data
     os.makedirs(os.path.dirname(answers_file), exist_ok=True)
     ans_file = open(answers_file, "w")
     
-    dataset = load_from_disk("/localhome/data/datasets/medmax_eval_data/eval_data")
+    dataset = load_dataset("mint-medmax/medmax_eval_data")
     
     dataset = dataset.filter(lambda example: example['task_name'] == "visual_chat")
     for idx, example in tqdm(enumerate(dataset)):

@@ -9,6 +9,7 @@ from open_clip import create_model_from_pretrained, get_tokenizer
 from PIL import Image
 import random
 import transformers
+from evaluation.const import OAI_KEY
 
 
 def set_seeds(seed):
@@ -81,11 +82,9 @@ def compare_messages_gen(question, true_answer, generated_answer):
 class GPT:
   prompt_percent = 0.8
 
-  # TODO: use a more secure way to store the API key
-  #TODO TODO TODO TODO TODO
   openai_cxn_dict = {
     'default': {
-        'api_key': "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",
+        'api_key': OAI_KEY,
     },
   }
 
@@ -192,8 +191,6 @@ class CLIPSimilarity:
 
 def get_biomed_clip_model():
     return CLIPSimilarity(model_name="hf-hub:microsoft/BiomedCLIP-PubMedBERT_256-vit_base_patch16_224")
-
-
 
 
 def chameleon_prompt_processor(question, image_path, task_type):

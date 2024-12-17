@@ -1,18 +1,11 @@
-import torch
-import argparse
-from PIL import Image
 from tqdm import tqdm
 from datasets import load_dataset
-from enum import Enum
-from open_clip import create_model_from_pretrained, get_tokenizer
 from evaluation.eval_utils import add_results_to_json, log_samples, calculate_accuracy_and_stderr, get_biomed_clip_model, SimilarityType
-from inference.inference_utils import chameleon_generate, load_chameleon
+from inference.inference_utils import chameleon_generate
 import os
-from datasets import load_from_disk
 
 
 
-# def main(args):
 def run_image_captioning_eval(model, prompt_processor, save_dir, save_name, eval_data_dir):
 
     similarity_calculator = get_biomed_clip_model()
@@ -27,7 +20,7 @@ def run_image_captioning_eval(model, prompt_processor, save_dir, save_name, eval
         
         text_samples = []
         
-        data = load_from_disk("/localhome/data/datasets/medmax_eval_data/eval_data")
+        data = load_dataset("mint-medmax/medmax_eval_data")
         data = data.filter(lambda example: example['task_name'] == "image_captioning" and example['question_type'] == dataname)
         
         for instance in tqdm(data):
@@ -62,15 +55,13 @@ def run_image_captioning_eval(model, prompt_processor, save_dir, save_name, eval
 def run_image_generation_eval(model, prompt_processor, save_dir, save_name, eval_data_dir):
     
     similarity_calculator = get_biomed_clip_model()
-    # model = load_anole(args.ckpt)
-    
     
     datanames = ["pmc_oa", "quilt", "report"]
     results_dict = {}
     for dataname in datanames:
 
-        data = load_from_disk("/localhome/data/datasets/medmax_eval_data/eval_data")
-        data = data.filter(lambda example: example['task_name'] == "image_generation" and example['question_type'] == dataname)
+        data = load_dataset("mint-medmax/medmax_eval_data")
+        data = data.filter(lambda example: example['task_name'] == "image_generation" and example['question_type'] == dataname).select(range(100)) # 100 examples is sufficient to compute a score
         
         generation_similarity_scores = []
         image_samples = []

@@ -1,22 +1,16 @@
 import os
-import torch
-import argparse
 from copy import deepcopy
 from tqdm import tqdm
 from pathlib import Path
 from collections import defaultdict
-import pandas as pd
 from evaluation.eval_utils import add_results_to_json, get_biomed_clip_model, SimilarityType
-
 from inference.inference_utils import chameleon_generate
 import json
-import shortuuid
 import math
 import tiktoken
 import openai
-from PIL import Image
-from enum import Enum
-from datasets import load_from_disk
+from datasets import load_dataset
+from evaluation.const import OAI_KEY
 
 
 def load_file_jsonl(path):
@@ -65,12 +59,10 @@ def compare_messages_gen(question, ans1, ans2):
 class GPT:
   prompt_percent = 0.8
 
-  # TODO: use a more secure way to store the API key
-  # TODO TODO TODO TODO TODO
   openai_cxn_dict = {
     'default': {
-        'api_key': "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",
-    },
+        'api_key': OAI_KEY
+        }
   }
 
   deployment_max_length_dict = {
@@ -178,7 +170,7 @@ def infer(samples):
 
 def run_mm_out_eval(model, prompt_processor, save_dir, save_name, eval_data_dir):
     
-    dataset = load_from_disk("/localhome/data/datasets/medmax_eval_data/eval_data")
+    dataset = load_dataset("mint-medmax/medmax_eval_data")
     dataset = dataset.filter(lambda example: example['task_name'] == "mm_out")
     
     answers_file = f"{save_dir}/logs/{save_name}.jsonl"
