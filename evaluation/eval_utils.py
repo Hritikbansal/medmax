@@ -234,11 +234,6 @@ def chameleon_prompt_processor(question, image_path, task_type):
     modality = ["image", "text"]
     
     return content, modality
-    
-    
-
-def medmax_no_vqa_ablation_prompt_processor(question, image_path, task_type):
-    pass
 
 def sft_prompt_processor(question, image_path, task_type):
     
