@@ -49,6 +49,7 @@ cd <eval_data_dir>
 git lfs install
 git clone https://huggingface.co/datasets/mint-medmax/medmax_eval_data
 cd medmax_eval_data
+mkdir images
 tar -xzvf images.tar.gz -C images
 ```
 
