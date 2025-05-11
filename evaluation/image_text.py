@@ -20,7 +20,7 @@ def run_image_captioning_eval(model, prompt_processor, save_dir, save_name, eval
         
         text_samples = []
         
-        data = load_dataset("mint-medmax/medmax_eval_data")
+        data = load_dataset("mint-medmax/medmax_eval_data", split="train")
         data = data.filter(lambda example: example['task_name'] == "image_captioning" and example['question_type'] == dataname)
         
         for instance in tqdm(data):
