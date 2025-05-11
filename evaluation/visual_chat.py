@@ -183,7 +183,7 @@ def run_visual_chat_eval(model, prompt_processor, save_dir, save_name, eval_data
     os.makedirs(os.path.dirname(answers_file), exist_ok=True)
     ans_file = open(answers_file, "w")
     
-    dataset = load_dataset("mint-medmax/medmax_eval_data")
+    dataset = load_dataset("mint-medmax/medmax_eval_data", split="train")
     
     dataset = dataset.filter(lambda example: example['task_name'] == "visual_chat")
     for idx, example in tqdm(enumerate(dataset)):
