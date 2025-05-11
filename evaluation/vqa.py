@@ -6,7 +6,7 @@ from tqdm import tqdm
 import os
 
 def run_vqa_eval(task_name, task_type, model, prompt_processor, save_dir, save_name, eval_data_dir):
-    dataset = load_dataset("mint-medmax/medmax_eval_data")
+    dataset = load_dataset("mint-medmax/medmax_eval_data", split="train")
     dataset = dataset.filter(lambda example: example['task_name'] == task_name and example['question_type'] == task_type)
     
     scores = []
