@@ -19,3 +19,6 @@ wandb
 tiktoken
 shortuuid
 rouge_score
+openai
+open_clip_torch
+datasets
