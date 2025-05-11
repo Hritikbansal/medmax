@@ -170,7 +170,7 @@ def infer(samples):
 
 def run_mm_out_eval(model, prompt_processor, save_dir, save_name, eval_data_dir):
     
-    dataset = load_dataset("mint-medmax/medmax_eval_data")
+    dataset = load_dataset("mint-medmax/medmax_eval_data", split="train")
     dataset = dataset.filter(lambda example: example['task_name'] == "mm_out")
     
     answers_file = f"{save_dir}/logs/{save_name}.jsonl"
