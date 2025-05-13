@@ -37,6 +37,11 @@ mkdir -p .gradio
 GRADIO_SERVER_NAME=0.0.0.0 GRADIO_TEMP_DIR=.gradio python demo.py -c <your checkpoint folder>
 ```
 
+We also give example code for custom inference which can be run with
+```
+CUDA_VISIBLE_DEVICES=0 python -m inference.custom_inference
+```
+
 
 ## Evaluation
 
